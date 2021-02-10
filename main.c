@@ -10,6 +10,7 @@ FILE *users;
 
 int bot;
 int turn=1;
+int showsteps=0;
 //int height=10;
 //int width=10;
 #define height 10
@@ -56,8 +57,12 @@ void getpoints(ship *s,int num);
 void getpointsA(ship *s,int num);
 void putshipA(int num);
 void show(char map[height][width]);
-void boundary(char map[height][width]);
+void boundaryO(char map[height][width]);
 void game();
+void shoot(int num);
+int change(int num);
+void anykey();
+void boundaryW(char map[height][width]);
 
 int main(){
     count[1]=4;
@@ -81,9 +86,7 @@ int main(){
             }
         }
     }
-    //show(shipmap[1]);
     mainmenu();
-    //getchar();
 }
 
 void mainmenu(){
@@ -139,8 +142,7 @@ void multiplayer(){
     }
     system("cls");
     show(shipmap[1]);
-    printf("Press any key to continue...");
-    getch();
+    anykey();
     system("cls");
     printf("Second player\n");
     printf("1. Sign in\n2. Sign up\n");
@@ -163,13 +165,13 @@ void multiplayer(){
     }
     system("cls");
     show(shipmap[2]);
-    printf("Press any key to continue...");
-    getch();
+    anykey();
     game();
 }
 void singleplayer(){
     bot=1;
     int choice;
+    system("cls");
     printf("Player:\n");
     printf("1. Sign in\n2. Sign up\n");
     scanf("%d",&choice);
@@ -191,10 +193,12 @@ void singleplayer(){
     }
     system("cls");
     show(shipmap[1]);
-    printf("Press any key to continue...");
-    getch();
+    anykey();
     strcpy(player[2],"Mr. bot");
     putshipA(2);
+    system("cls");
+    show(shipmap[2]);
+    anykey();
     game();
 }
 void signin(int num){
@@ -261,7 +265,7 @@ void adduser(user *new){
 void putshipM(int num){
     int i,j;
     previous=NULL;
-    for(i=1;i<9;i++){
+    for(i=8;i>=1;i--){
         for(j=1;j<=count[i];j++){
             system("cls");
             show(shipmap[num]);
@@ -277,7 +281,7 @@ void putshipM(int num){
             previous=current;
             printf("Put ship size %d num #%d\n",i,j);
             getpoints(current,num);
-            boundary(shipmap[num]);
+            boundaryO(shipmap[num]);
         }
     }
     end[num]=previous;
@@ -359,10 +363,12 @@ void getpoints(ship *s,int num){
 void putshipA(int num){
     int i,j;
     previous=NULL;
-    for(i=1;i<9;i++){
+    for(i=8;i>0;i--){
         for(j=1;j<=count[i];j++){
-            system("cls");
-            show(shipmap[num]);
+            if(showsteps){
+                system("cls");
+                show(shipmap[num]);
+            }
             current=(ship *)(malloc(sizeof(ship)));
             current->len=i;
             if(head[num]==NULL){
@@ -373,14 +379,15 @@ void putshipA(int num){
                 current->prev=previous;
             }
             previous=current;
-            //printf("Put ship size %d num #%d\n",i,j);
             getpointsA(current,num);
-            boundary(shipmap[num]);
-            getch();
+            boundaryO(shipmap[num]);
+            if(showsteps){
+                anykey();
+            }
         }
     }
     end[num]=previous;
-} //Fix needed //Segmentation
+}
 void getpointsA(ship *s,int num){
     int i,min,max;
     int invalid=1;
@@ -389,19 +396,15 @@ void getpointsA(ship *s,int num){
         s->p1.x=rand()%width;
         s->p2=s->p1;
         if(shipmap[num][s->p1.y][s->p1.x]!=' '){
-            //printf("Invalid input, Try again\n");
             getpointsA(s,num);
         }
         else{
-            //printf("Ship has been put\n");
             shipmap[num][s->p1.y][s->p1.x]='#';
         }
         return;
     }
-    //printf("Fisrt point of ship:\n");
     s->p1.y=rand()%height;
     s->p1.x=rand()%width;
-    //printf("Second point of ship:\n");
     s->p2.y=rand()%height;
     s->p2.x=rand()%width;
     min=min(s->p1.x,s->p2.x);
@@ -409,14 +412,11 @@ void getpointsA(ship *s,int num){
     if(max-min==s->len-1 && s->p1.y==s->p2.y){
         for(i=min;i<=max;i++){
             if(shipmap[num][s->p1.y][i]!=' '){
-                //printf("Can't put ship in this coordinates, Try again\n");
                 getpointsA(s,num);
                 return;
             }
         }
-        //printf("Ship has been put\n");
         for(i=min;i<=max;i++){
-            getpointsA(s,num);
             shipmap[num][s->p1.y][i]='#';
         }
         invalid=0;
@@ -426,19 +426,16 @@ void getpointsA(ship *s,int num){
     if(max-min==s->len-1 && s->p1.x==s->p2.x){
         for(i=min;i<=max;i++){
             if(shipmap[num][i][s->p1.x]!=' '){
-                //printf("Can't put ship in this coordinates, Try again\n");
                 getpointsA(s,num);
                 return;
             }
         }
-        //printf("Ship has been put\n");
         for(i=min;i<=max;i++){
             shipmap[num][i][s->p1.x]='#';
         }
         invalid=0;
     }
     if(invalid){
-        //printf("Invalid input, Try again\n");
         getpointsA(s,num);
     }
 }
@@ -464,7 +461,7 @@ void show(char map[height][width]){
     }
     printf("\n");
 }
-void boundary(char map[height][width]){
+void boundaryO(char map[height][width]){
     int i,j,ii,jj;
     for(i=0;i<height;i++){
         for(j=0;j<width;j++){
@@ -480,8 +477,119 @@ void boundary(char map[height][width]){
     }
 }
 void game(){
-    printf("Press any key to start the game");
+    int choice;
+    printf("\nPress any key to start the game");
     while(head[1]!=NULL && head[2]!=NULL){
-        system("")
+        system("cls");
+        show(map[1]);
+        if(!bot){
+            printf("First player's turn\n");
+        }
+        printf("1. Shoot\n2. Rocket\n3. Save\n");
+        scanf("%d",&choice);
+        switch(choice) {
+            case 1:
+                shoot(1);
+                break;
+            case 2:
+                //rocket(1);
+                break;
+                //case 3:
+                //save();
+        }
+        boundaryW(map[1]);
+        system("cls");
+        show(map[1]);
+        anykey();
+        if(bot){
+            shoot(2);
+            boundaryW(map[2]);
+        }
+        else{
+            system("cls");
+            show(map[2]);
+            printf("Second player's turn\n");
+            printf("1. Shoot\n2. Rocket\n3. Save\n");
+            scanf("%d",&choice);
+            switch(choice) {
+                case 1:
+                    shoot(2);
+                    break;
+                case 2:
+                    //rocket(1);
+                    break;
+                //case 3:
+                    //save();
+            }
+            boundaryW(map[2]);
+            system("cls");
+            show(map[2]);
+            anykey();
+        }
+    }
+}
+void shoot(int num){
+    int i,j;
+    point p;
+    if(bot && num==2){
+        p.y=rand()%height;
+        p.x=rand()%width;
+    }
+    else{
+        getpoint(&p);
+    }
+    if(map[num][p.y][p.x]==' '){
+        if(shipmap[change(num)][p.y][p.x]=='#'){
+            map[num][p.y][p.x]='C';
+            for(i=p.x-1;i<=p.x+1;i++){
+                for(j=p.y-1;j<=p.y+1;j++){
+                    if(0<=i && i<height && 0<=j && j<width){
+                        if(shipmap[change(num)][i][j]=='#' && map[num][i][j]==' '){
+                            map[num][p.y][p.x]='E';
+                        }
+                    }
+                }
+            }
+            boundaryW(map[num]);
+            system("cls");
+            show(map[num]);
+            shoot(num);
+        }
+        else{
+            map[num][p.y][p.x]='W';
+        }
+    }
+    else{
+        if(!bot)
+            printf("You can't select this area, Try again\n");
+        shoot(num);
+    }
+
+}
+int change(int num){
+    if(num==1) return 2;
+    if(num==2) return 1;
+}
+void anykey(){
+    printf("Press any key to continue... ");
+    getch();
+}
+void boundaryW(char map[height][width]){
+    int i,j,ii,jj;
+    for(i=0;i<height;i++){
+        for(j=0;j<width;j++){
+            if(map[i][j]=='C'){
+                for(ii=i-1;ii<=i+1;ii++){
+                    for(jj=j-1;jj<=j+1;jj++){
+                        if(0<=ii && ii<height && 0<=jj && jj<width){
+                            if(map[ii][jj]==' ')
+                                map[ii][jj]='W';
+                            if(map[ii][jj]=='E')
+                                map[ii][jj]='C';
+                        }
+                    }
+                }
+            }
+        }
     }
 }
