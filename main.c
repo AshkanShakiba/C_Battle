@@ -387,6 +387,16 @@ void putshipA(int num){
         }
     }
     end[num]=previous;
+
+    /*
+    current=head[num];
+    while(current!=end[num]){
+        printf("len=%d  (%d,%d)...(%d,%d)\n",current->len,current->p1.x,current->p1.y,current->p2.x,current->p2.y);
+        current=current->next;
+    }
+    printf("len=%d  (%d,%d)...(%d,%d)\n",current->len,current->p1.x,current->p1.y,current->p2.x,current->p2.y);
+    anykey();
+    */
 }
 void getpointsA(ship *s,int num){
     int i,min,max;
@@ -540,7 +550,8 @@ void shoot(int num){
     }
     if(map[num][p.y][p.x]==' '){
         if(shipmap[change(num)][p.y][p.x]=='#'){
-            map[num][p.y][p.x]='C';
+            map[num][p.y][p.x]='E';
+            /*
             for(i=p.x-1;i<=p.x+1;i++){
                 for(j=p.y-1;j<=p.y+1;j++){
                     if(0<=i && i<height && 0<=j && j<width){
@@ -550,6 +561,7 @@ void shoot(int num){
                     }
                 }
             }
+             */
             boundaryW(map[num]);
             system("cls");
             show(map[num]);
@@ -575,17 +587,138 @@ void anykey(){
     getch();
 }
 void boundaryW(char map[height][width]){
+    int min,max;
     int i,j,ii,jj;
+    int complete,done;
+    //convert E to C
+    for(i=1;i<3;i++){
+        printf("player #%d\n",i);
+        current=head[i];
+        while(current!=end[i]){
+            printf("size %d\n",current->len);
+            done=0;
+            complete=1;
+            previous=NULL;
+            if(current->p1.y==current->p2.y){
+                min=min(current->p1.x,current->p2.x);
+                max=max(current->p1.x,current->p2.x);
+                for(j=min;j<=max;j++){
+                    if(map[current->p1.y][j]!='E'){
+                        complete=0;
+                    }
+                }
+                if(complete){
+                    for(j=min;j<=max;j++){
+                        map[current->p1.y][j]='C';
+                    }
+                    if(current==head[i]){
+                        head[i]=current->next;
+                        head[i]->prev=NULL;
+                        free(current);
+                        current=head[i];
+                    }
+                    else{
+                        current->prev=current->next;
+                        current->next=current->prev;
+                        previous=current;
+                        current=current->next;
+                        free(previous);
+                    }
+                }
+                else{
+                    current=current->next;
+                }
+                done=1;
+            }
+            if(current->p1.x==current->p2.x && !done){
+                min=min(current->p1.y,current->p2.y);
+                max=max(current->p1.y,current->p2.y);
+                for(j=min;j<=max;j++){
+                    if(map[j][current->p1.x]!='E'){
+                        complete=0;
+                    }
+                }
+                if(complete){
+                    for(j=min;j<=max;j++) {
+                        map[j][current->p1.x]='C';
+                    }
+                    if(current==head[i]){
+                        head[i]=current->next;
+                        head[i]->prev=NULL;
+                        free(current);
+                        current=head[i];
+                    }
+                    else{
+                        current->prev=current->next;
+                        current->next=current->prev;
+                        previous=current;
+                        current=current->next;
+                        free(previous);
+                    }
+                }
+                else{
+                    current=current->next;
+                }
+            }
+        }
+        done=0;
+        complete=1;
+        if(current->p1.y==current->p2.y){
+            min=min(current->p1.x,current->p2.x);
+            max=max(current->p1.x,current->p2.x);
+            for(j=min;j<=max;j++){
+                if(map[current->p1.y][j]!='E'){
+                    complete=0;
+                }
+            }
+            if(complete){
+                for(j=min;j<=max;j++){
+                    map[current->p1.y][j]='C';
+                }
+                if(current==head[i]){
+                    head[i]=end[i]=NULL;
+                    free(current);
+                }
+                else{
+                    end[i]=current->prev;
+                    end[i]->next=NULL;
+                    free(current);
+                }
+            }
+            done=1;
+        }
+        if(current->p1.x==current->p2.x && !done){
+            min=min(current->p1.y,current->p2.y);
+            max=max(current->p1.y,current->p2.y);
+            for(j=min;j<=max;j++){
+                if(map[j][current->p1.x]!='E'){
+                    complete=0;
+                }
+            }
+            if(complete){
+                for(j=min;j<=max;j++){
+                    map[j][current->p1.x]='C';
+                }
+                if(current==head[i]){
+                    head[i]=end[i]=NULL;
+                    free(current);
+                }
+                else{
+                    end[i]=current->prev;
+                    end[i]->next=NULL;
+                    free(current);
+                }
+            }
+        }
+    }
+    //convert <space> to W
     for(i=0;i<height;i++){
         for(j=0;j<width;j++){
             if(map[i][j]=='C'){
                 for(ii=i-1;ii<=i+1;ii++){
                     for(jj=j-1;jj<=j+1;jj++){
-                        if(0<=ii && ii<height && 0<=jj && jj<width){
-                            if(map[ii][jj]==' ')
+                        if(0<=ii && ii<height && 0<=jj && jj<width && map[ii][jj]==' '){
                                 map[ii][jj]='W';
-                            if(map[ii][jj]=='E')
-                                map[ii][jj]='C';
                         }
                     }
                 }
