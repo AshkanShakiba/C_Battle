@@ -38,8 +38,6 @@ typedef struct{
     point p2;
     void *next;
     void *prev;
-    //struct ship *next;
-    //struct ship *prev;
 }ship;
 
 ship *head[3],*end[3];
@@ -72,7 +70,7 @@ void game();
 void shoot(int num);
 int change(int num);
 void anykey();
-void boundaryW(char map[height][width]);
+void boundaryW(char map[height][width],int num);
 int CE(int num);
 void show(char map[height][width]);
 void settings();
@@ -83,9 +81,12 @@ void reversetheme();
 void simpletheme();
 void scoreboard();
 void reset();
-void save();
+void save(int turnnum);
 void Load();
+void loadlast();
 int shipcount(int num);
+void rocket(int num);
+void about();
 
 int main(){
     /*
@@ -114,7 +115,6 @@ int main(){
     score[2]=0;
     time_t t = time(NULL);
     srand(t);
-    info=fopen("info.bin","r+");
     users=fopen("users.bin","r+");
     int i,j,k;
     for(i=1;i<3;i++){
@@ -131,33 +131,36 @@ int main(){
 void mainmenu(){
     int choice;
     system("cls");
-    printf("1. Play with a Friend\n2. Play with bot\n3. Load game\n");
-    printf("4. Load last game\n5. Settings\n6. Score Board\n7. Reset Data\n8. Exit\n");
+    printf("1. Play with a Friend\n2. Play with bot\n3. Load game\n4. Load last game\n");
+    printf("5. Settings\n6. Score Board\n7. Reset Data\n8. About\n9. Exit\n");
     scanf("%d",&choice);
     switch(choice){
         case 1:
             multiplayer();
             break;
-            case 2:
-                singleplayer();
-                break;
-                case 3:
-                    Load();
-                    break;
-                case 4:
-                    //loadlast();
-                    break;
-                case 5:
-                    settings();
-                    break;
-                case 6:
-                    scoreboard();
-                    break;
-                case 7:
-                    reset();
-                    break;
-                case 8:
-                    exit(0);
+        case 2:
+            singleplayer();
+            break;
+        case 3:
+            Load();
+            break;
+        case 4:
+            loadlast();
+            break;
+        case 5:
+            settings();
+            break;
+        case 6:
+            scoreboard();
+            break;
+        case 7:
+            reset();
+            break;
+        case 8:
+            about();
+            break;
+        case 9:
+            exit(0);
     }
 }
 void multiplayer(){
@@ -165,13 +168,19 @@ void multiplayer(){
     int choice;
     system("cls");
     printf("First player:\n");
-    printf("1. Sign in\n2. Sign up\n");
+    printf("1. Sign in\n2. Sign up\n3. Back to main menu\n");
     scanf("%d",&choice);
     switch(choice){
         case 1:
             signin(1);
             break;
         case 2:
+            signup(1);
+            break;
+        case 3:
+            mainmenu();
+            break;
+        default:
             signup(1);
     }
     printf("How to put ships?\n1. Auto\n2. Manual\n");
@@ -188,13 +197,19 @@ void multiplayer(){
     anykey();
     system("cls");
     printf("Second player:\n");
-    printf("1. Sign in\n2. Sign up\n");
+    printf("1. Sign in\n2. Sign up\n3. Back to main menu\n");
     scanf("%d",&choice);
     switch(choice){
         case 1:
             signin(2);
             break;
         case 2:
+            signup(2);
+            break;
+        case 3:
+            mainmenu();
+            break;
+        default:
             signup(2);
     }
     printf("How to put ships?\n1. Auto\n2. Manual\n");
@@ -216,13 +231,19 @@ void singleplayer(){
     int choice;
     system("cls");
     printf("Player:\n");
-    printf("1. Sign in\n2. Sign up\n");
+    printf("1. Sign in\n2. Sign up\n3. Back to main menu\n");
     scanf("%d",&choice);
     switch(choice){
         case 1:
             signin(1);
             break;
         case 2:
+            signup(1);
+            break;
+        case 3:
+            mainmenu();
+            break;
+        default:
             signup(1);
     }
     printf("How to put ships?\n1. Auto\n2. Manual\n");
@@ -373,6 +394,7 @@ void getpoints(ship *s,int num){
         s->p2=s->p1;
         if(shipmap[num][s->p1.y][s->p1.x]!=' '){
             printf("Invalid input, Try again\n");
+            getch();
             getpoints(s,num);
         }
         else{
@@ -419,6 +441,7 @@ void getpoints(ship *s,int num){
     }
     if(invalid){
         printf("Invalid input, Try again\n");
+        getch();
         getpoints(s,num);
     }
 }
@@ -531,34 +554,36 @@ void game(){
     score[1]=0;
     score[2]=0;
     while(CE(1)<sship && CE(2)<sship){
-        system("cls");
-        show(map[1]);
-        if(!bot){
-            printf("%s's turn\n",player[1]);
+        if(turn==1){
+            system("cls");
+            show(map[1]);
+            if(!bot){
+                printf("%s's turn\n",player[1]);
+            }
+            printf("1. Shoot\n2. Rocket\n3. Save\n");
+            scanf("%d",&choice);
+            switch(choice) {
+                case 1:
+                    shoot(1);
+                    break;
+                case 2:
+                    rocket(1);
+                    break;
+                case 3:
+                    save(1);
+                    break;
+                default:
+                    shoot(1);
+            }
+            boundaryW(map[1],1);
+            system("cls");
+            show(map[1]);
+            anykey();
         }
-        printf("1. Shoot\n2. Rocket\n3. Save\n");
-        scanf("%d",&choice);
-        switch(choice) {
-            case 1:
-                shoot(1);
-                break;
-            case 2:
-                //rocket(1);
-                break;
-            case 3:
-                //save();
-                break;
-            default:
-                shoot(1);
-        }
-        boundaryW(map[1]);
-        system("cls");
-        show(map[1]);
-        anykey();
         if(CE(1)<sship){
             if(bot){
                 shoot(2);
-                boundaryW(map[2]);
+                boundaryW(map[2],2);
             }
             else{
                 system("cls");
@@ -571,20 +596,21 @@ void game(){
                         shoot(2);
                         break;
                     case 2:
-                        //rocket(1);
+                        rocket(1);
                         break;
                     case 3:
-                        //save();
+                        save(2);
                         break;
                     default:
                         shoot(2);
                 }
-                boundaryW(map[2]);
+                boundaryW(map[2],2);
                 system("cls");
                 show(map[2]);
                 anykey();
             }
         }
+        turn=1;
     }
     system("cls");
     if(CE(1)==sship){
@@ -653,11 +679,12 @@ void shoot(int num){
                 }
             }
              */
-            boundaryW(map[num]);
+            boundaryW(map[num],num);
             system("cls");
             if(num==1 || !bot){
                 show(map[num]);
             }
+            score[num]++;
             if(CE(num)<sship) shoot(num);
         }
         else{
@@ -679,7 +706,7 @@ void anykey(){
     printf("Press any key to continue... ");
     getch();
 }
-void boundaryW(char map[height][width]){
+void boundaryW(char map[height][width],int num){
     int min,max;
     int i,j,ii,jj;
     int complete,done;
@@ -705,6 +732,19 @@ void boundaryW(char map[height][width]){
                     if(current==head[i]){
                         head[i]=current->next;
                         head[i]->prev=NULL;
+                        switch(current->len){
+                            case 5:
+                                score[i]+=5;
+                                break;
+                            case 3:
+                                score[i]+=8;
+                                break;
+                            case 2:
+                                score[i]+=12;
+                                break;
+                            case 1:
+                                score[i]+=25;
+                        }
                         if(freeOk);
                             free(current);
                         current=head[i];
@@ -716,6 +756,19 @@ void boundaryW(char map[height][width]){
                         tmp->prev=current->prev;
                         previous=current;
                         current=current->next;
+                        switch(previous->len){
+                            case 5:
+                                score[i]+=5;
+                                break;
+                            case 3:
+                                score[i]+=8;
+                                break;
+                            case 2:
+                                score[i]+=12;
+                                break;
+                            case 1:
+                                score[i]+=25;
+                        }
                         if(freeOk);
                             free(previous);
                     }
@@ -740,6 +793,19 @@ void boundaryW(char map[height][width]){
                     if(current==head[i]){
                         head[i]=current->next;
                         head[i]->prev=NULL;
+                        switch(current->len){
+                            case 5:
+                                score[i]+=5;
+                                break;
+                            case 3:
+                                score[i]+=8;
+                                break;
+                            case 2:
+                                score[i]+=12;
+                                break;
+                            case 1:
+                                score[i]+=25;
+                        }
                         if(freeOk);
                             free(current);
                         current=head[i];
@@ -751,6 +817,19 @@ void boundaryW(char map[height][width]){
                         tmp->prev=current->prev;
                         previous=current;
                         current=current->next;
+                        switch(previous->len){
+                            case 5:
+                                score[i]+=5;
+                                break;
+                            case 3:
+                                score[i]+=8;
+                                break;
+                            case 2:
+                                score[i]+=12;
+                                break;
+                            case 1:
+                                score[i]+=25;
+                        }
                         if(freeOk);
                             free(previous);
                     }
@@ -776,12 +855,38 @@ void boundaryW(char map[height][width]){
                 }
                 if(current==head[i]){
                     head[i]=end[i]=NULL;
+                    switch(current->len){
+                        case 5:
+                            score[i]+=5;
+                            break;
+                        case 3:
+                            score[i]+=8;
+                            break;
+                        case 2:
+                            score[i]+=12;
+                            break;
+                        case 1:
+                            score[i]+=25;
+                    }
                     if(freeOk);
                         free(current);
                 }
                 else{
                     end[i]=current->prev;
                     end[i]->next=NULL;
+                    switch(current->len){
+                        case 5:
+                            score[i]+=5;
+                            break;
+                        case 3:
+                            score[i]+=8;
+                            break;
+                        case 2:
+                            score[i]+=12;
+                            break;
+                        case 1:
+                            score[i]+=25;
+                    }
                     if(freeOk);
                         free(current);
                 }
@@ -802,12 +907,38 @@ void boundaryW(char map[height][width]){
                 }
                 if(current==head[i]){
                     head[i]=end[i]=NULL;
+                    switch(current->len){
+                        case 5:
+                            score[i]+=5;
+                            break;
+                        case 3:
+                            score[i]+=8;
+                            break;
+                        case 2:
+                            score[i]+=12;
+                            break;
+                        case 1:
+                            score[i]+=25;
+                    }
                     if(freeOk);
                         free(current);
                 }
                 else{
                     end[i]=current->prev;
                     end[i]->next=NULL;
+                    switch(current->len){
+                        case 5:
+                            score[i]+=5;
+                            break;
+                        case 3:
+                            score[i]+=8;
+                            break;
+                        case 2:
+                            score[i]+=12;
+                            break;
+                        case 1:
+                            score[i]+=25;
+                    }
                     if(freeOk);
                         free(current);
                 }
@@ -817,11 +948,30 @@ void boundaryW(char map[height][width]){
     //convert <space> to W
     for(i=0;i<height;i++){
         for(j=0;j<width;j++){
+            /*if(map[i][j]=='E'){
+                for(ii=i-1;ii<=i+1;ii++){
+                    for(jj=j-1;jj<=j+1;jj++){
+                        if(0<=ii && ii<height && 0<=jj && jj<width && map[ii][jj]=='E' && ii!=i && jj!=j){
+                            map[ii][jj]='C';
+                            map[i][j]='C';
+                        }
+                        if(0<=ii && ii<height && 0<=jj && jj<width && ii!=i && jj!=j){
+                            if(shipmap[change(num)][ii][jj]=='#' && map[ii][jj]!=' '){
+                                map[ii][jj]='C';
+                                map[i][j]='C';
+                            }
+                        }
+                    }
+                }
+            }*/
             if(map[i][j]=='C'){
                 for(ii=i-1;ii<=i+1;ii++){
                     for(jj=j-1;jj<=j+1;jj++){
                         if(0<=ii && ii<height && 0<=jj && jj<width && map[ii][jj]==' '){
                                 map[ii][jj]='W';
+                        }
+                        if(0<=ii && ii<height && 0<=jj && jj<width && map[ii][jj]=='E'){
+                            map[ii][jj]='C';
                         }
                     }
                 }
@@ -898,6 +1048,7 @@ void settings(){
             break;
         default:
             printf("Invalid input, Try again\n");
+            getch();
             settings();
     }
 }
@@ -921,6 +1072,7 @@ void theme(){
             break;
         default:
             printf("Invalid input, Try again\n");
+            getch();
             theme();
     }
 }
@@ -954,6 +1106,7 @@ void textcolor(){
             break;
         default:
             printf("Invalid input, Try again\n");
+            getch();
             textcolor();
     }
     printf("%sText color has been changed, press any key to back\n",RESET);
@@ -1005,17 +1158,42 @@ void scoreboard(){
     mainmenu();
 }
 void reset(){
-    fclose(info);
-    fclose(users);
-    info=fopen("info.bin","w");
-    users=fopen("users.bin","w");
-    fclose(info);
-    fclose(users);
-    info=fopen("info.bin","r+");
-    users=fopen("users.bin","r+");
+    int i,choice;
+    system("cls");
+    printf("Are you sure? all data will be removed, it can't be undone\n");
+    printf("1. Yes, I'm sure\n2. Back to main menu\n");
+    scanf("%d",&choice);
+    switch(choice){
+        case 1:
+            fclose(users);
+            info=fopen("info.bin","w");
+            users=fopen("users.bin","w");
+            fclose(info);
+            fclose(users);
+            users=fopen("users.bin","r+");
+            load[1]=fopen("load1.bin","w");
+            load[2]=fopen("load2.bin","w");
+            load[3]=fopen("load3.bin","w");
+            load[4]=fopen("load4.bin","w");
+            load[5]=fopen("load5.bin","w");
+            load[6]=fopen("load6.bin","w");
+            for(i=1;i<7;i++){
+                fclose(load[i]);
+            }
+            printf("All data removed, press any key to back\n");
+            getch();
+            mainmenu();
+        case 2:
+            mainmenu();
+            break;
+        default:
+            printf("Invalid input, Try again\n");
+            getch();
+            reset();
+    }
 }
-void save(){
-    int i,j;
+void save(int turnnum){
+    int i,j,theme;
     system("cls");
     printf("Choose your saving file\n");
     printf("1. Load 1\n2. Load 2\n3. Load 3\n4. Load 4\n5. Load 5\n6. Load 6\n");
@@ -1042,15 +1220,18 @@ void save(){
         default:
             printf("Invalid input, Try again\n");
             getch();
-            save();
+            save(turnnum);
             return;
     }
     if(load[i]==NULL){
-        printf("Unable to save\n");
+        printf("Unable to save, press any key to continue\n");
+        getch();
         mainmenu();
         return;
     }
     fseek(load[i],0,SEEK_SET);
+    fwrite(&bot,sizeof(int),1,load[i]);
+    fwrite(&turnnum,sizeof(int),1,load[i]);
     for(j=1;j<3;j++){
         int shipCount=shipcount(j);
         fwrite(&shipCount,sizeof(int),1,load[i]);
@@ -1059,12 +1240,19 @@ void save(){
         fwrite(player[j],sizeof(player[j]),1,load[i]);
     }
     if(strcmp(RED,"\x1b[31m")==0)
-        fwrite(1,sizeof(int),1,load[i]);
+        theme=1;
     if(strcmp(RED,"\x1b[34m")==0)
-        fwrite(2,sizeof(int),1,load[i]);
+        theme=2;
     if(strcmp(RED,"\x1b[0m")==0)
-        fwrite(3,sizeof(int),1,load[i]);
+        theme=3;
+    fwrite(&theme,sizeof(int),1,load[i]);
     fclose(load[i]);
+    info=fopen("info.bin","w+");
+    fwrite(&i,sizeof(int),1,info);
+    fclose(info);
+    printf("Saved successfully, press any key to back\n");
+    getch();
+    mainmenu();
 }
 void Load(){
     int i,j;
@@ -1099,10 +1287,20 @@ void Load(){
     }
     if(load[i]==NULL){
         printf("Unable to load\n");
+        printf("Press any key to back\n");
+        getch();
         mainmenu();
         return;
     }
     fseek(load[i],0,SEEK_SET);
+    if(fread(&bot,sizeof(int),1,load[i])<1){
+        printf("Unable to load\n");
+        printf("Press any key to back\n");
+        getch();
+        mainmenu();
+        return;
+    }
+    fread(&turn,sizeof(int),1,load[i]);
     for(j=1;j<3;j++){
         int shipCount;
         fread(&shipCount,sizeof(int),1,load[i]);
@@ -1114,15 +1312,125 @@ void Load(){
     fread(&theme,sizeof(int),1,load[i]);
     switch(theme){
         case 1:
-            defaulttheme();
+            strcpy(RED,"\x1b[31m");
+            strcpy(GREEN,"\x1b[32m");
+            strcpy(YELLOW,"\x1b[33m");
+            strcpy(BLUE,"\x1b[34m");
+            strcpy(MAGENTA,"\x1b[35m");
+            strcpy(CYAN,"\x1b[36m");
             break;
         case 2:
-            reversetheme();
+            strcpy(RED,"\x1b[34m");
+            strcpy(GREEN,"\x1b[35m");
+            strcpy(YELLOW,"\x1b[36m");
+            strcpy(BLUE,"\x1b[31m");
+            strcpy(MAGENTA,"\x1b[32m");
+            strcpy(CYAN,"\x1b[33m");
             break;
         case 3:
-            simpletheme();
+            strcpy(RED,"\x1b[0m");
+            strcpy(GREEN,"\x1b[0m");
+            strcpy(YELLOW,"\x1b[0m");
+            strcpy(BLUE,"\x1b[0m");
+            strcpy(MAGENTA,"\x1b[0m");
+            strcpy(CYAN,"\x1b[0m");
     }
     fclose(load[i]);
+    printf("Loaded successfully, press any key to start the game\n");
+    getch();
+    game();
+}
+void loadlast(){
+    int i,j;
+    system("cls");
+    info=fopen("info.bin","r+");
+    if(fread(&i,sizeof(int),1,info)<1){
+        printf("Unable to load\n");
+        printf("Press any key to back\n");
+        getch();
+        mainmenu();
+        return;
+    }
+    fclose(info);
+    switch(i){
+        case 1:
+            load[1]=fopen("load1.bin","r+");
+            break;
+        case 2:
+            load[2]=fopen("load2.bin","r+");
+            break;
+        case 3:
+            load[3]=fopen("load3.bin","r+");
+            break;
+        case 4:
+            load[4]=fopen("load4.bin","r+");
+            break;
+        case 5:
+            load[5]=fopen("load5.bin","r+");
+            break;
+        case 6:
+            load[6]=fopen("load6.bin","r+");
+            break;
+        default:
+            printf("Invalid input, Try again\n");
+            getch();
+            Load();
+            return;
+    }
+    if(load[i]==NULL){
+        printf("Unable to load\n");
+        printf("Press any key to back\n");
+        getch();
+        mainmenu();
+        return;
+    }
+    fseek(load[i],0,SEEK_SET);
+    if(fread(&bot,sizeof(int),1,load[i])<1){
+        printf("Unable to load\n");
+        printf("Press any key to back\n");
+        getch();
+        mainmenu();
+        return;
+    }
+    fread(&turn,sizeof(int),1,load[i]);
+    for(j=1;j<3;j++){
+        int shipCount;
+        fread(&shipCount,sizeof(int),1,load[i]);
+        fread(shipmap[j],sizeof(shipmap[j]),1,load[i]);
+        fread(map[j],sizeof(map[j]),1,load[i]);
+        fread(player[j],sizeof(player[j]),1,load[i]);
+    }
+    int theme;
+    fread(&theme,sizeof(int),1,load[i]);
+    switch(theme){
+        case 1:
+            strcpy(RED,"\x1b[31m");
+            strcpy(GREEN,"\x1b[32m");
+            strcpy(YELLOW,"\x1b[33m");
+            strcpy(BLUE,"\x1b[34m");
+            strcpy(MAGENTA,"\x1b[35m");
+            strcpy(CYAN,"\x1b[36m");
+            break;
+        case 2:
+            strcpy(RED,"\x1b[34m");
+            strcpy(GREEN,"\x1b[35m");
+            strcpy(YELLOW,"\x1b[36m");
+            strcpy(BLUE,"\x1b[31m");
+            strcpy(MAGENTA,"\x1b[32m");
+            strcpy(CYAN,"\x1b[33m");
+            break;
+        case 3:
+            strcpy(RED,"\x1b[0m");
+            strcpy(GREEN,"\x1b[0m");
+            strcpy(YELLOW,"\x1b[0m");
+            strcpy(BLUE,"\x1b[0m");
+            strcpy(MAGENTA,"\x1b[0m");
+            strcpy(CYAN,"\x1b[0m");
+    }
+    fclose(load[i]);
+    printf("Loaded successfully, press any key to start the game\n");
+    getch();
+    game();
 }
 int shipcount(int num){
     ship *curr;
@@ -1134,3 +1442,16 @@ int shipcount(int num){
     }
     return count;
 }
+void rocket(int num){
+
+}
+void about(){
+    system("cls");
+    printf("Designed By Ashkan Shakiba\n");
+    printf("Developed By C\n");
+    printf("2021 Winter\n");
+    getch();
+    mainmenu();
+}
+
+//By Ashkan Shakiba
