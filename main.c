@@ -16,6 +16,8 @@ int showsteps=0;
 #define height 10
 #define width 10
 int count[9];
+int freeOk=0;
+int score[3];
 
 char player[3][33];
 char map[3][height][width];
@@ -43,6 +45,15 @@ typedef struct{
 ship *head[3],*end[3];
 ship *current,*previous;
 
+char RED[9]="\x1b[31m";
+char GREEN[9]="\x1b[32m";
+char YELLOW[9]="\x1b[33m";
+char BLUE[9]="\x1b[34m";
+char MAGENTA[9]="\x1b[35m";
+char CYAN[9]="\x1b[36m";
+char WHITE[9]="\x1b[0m";
+char RESET[9]="\x1b[0m";
+
 void mainmenu();
 void multiplayer();
 void singleplayer();
@@ -56,13 +67,23 @@ void getpoint(point *p);
 void getpoints(ship *s,int num);
 void getpointsA(ship *s,int num);
 void putshipA(int num);
-void show(char map[height][width]);
+void showS(char map[height][width]);
 void boundaryO(char map[height][width]);
 void game();
 void shoot(int num);
 int change(int num);
 void anykey();
 void boundaryW(char map[height][width]);
+int CE(int num);
+void show(char map[height][width]);
+void settings();
+void theme();
+void textcolor();
+void defaulttheme();
+void reversetheme();
+void darktheme();
+void scoreboard();
+void reset();
 
 int main(){
     count[1]=4;
@@ -73,6 +94,8 @@ int main(){
     count[6]=0;
     count[7]=0;
     count[8]=0;
+    score[1]=0;
+    score[2]=0;
     time_t t = time(NULL);
     srand(t);
     info=fopen("info.bin","r+");
@@ -91,8 +114,9 @@ int main(){
 
 void mainmenu(){
     int choice;
+    system("cls");
     printf("1. Play with a Friend\n2. Play with bot\n3. Load game\n");
-    printf("4.Load last game\n5. Settings\n6. Score Board\n7. Exit\n");
+    printf("4. Load last game\n5. Settings\n6. Score Board\n7. Reset Data\n8. Exit\n");
     scanf("%d",&choice);
     switch(choice){
         case 1:
@@ -108,12 +132,15 @@ void mainmenu(){
                     //loadlast();
                     break;
                 case 5:
-                    //settings();
+                    settings();
                     break;
                 case 6:
-                    //scoreboard();
+                    scoreboard();
                     break;
                 case 7:
+                    reset();
+                    break;
+                case 8:
                     exit(0);
     }
 }
@@ -144,7 +171,7 @@ void multiplayer(){
     show(shipmap[1]);
     anykey();
     system("cls");
-    printf("Second player\n");
+    printf("Second player:\n");
     printf("1. Sign in\n2. Sign up\n");
     scanf("%d",&choice);
     switch(choice){
@@ -196,9 +223,6 @@ void singleplayer(){
     anykey();
     strcpy(player[2],"Mr. bot");
     putshipA(2);
-    system("cls");
-    show(shipmap[2]);
-    anykey();
     game();
 }
 void signin(int num){
@@ -207,7 +231,16 @@ void signin(int num){
     getuser(&input);
     while(num==2 && strcmp(input.username,player[1])==0){
         printf("User has been chosen before, Try again\n");
-        getuser(&input);
+        printf("1. Sign in\n2. Sign up\n");
+        scanf("%d",&choice);
+        switch(choice){
+            case 1:
+                signin(num);
+                break;
+            case 2:
+                signup(num);
+        }
+        return;
     }
     fseek(users,0,SEEK_SET);
     while(fread(&avlb,sizeof(user),1,users)==1){
@@ -236,7 +269,15 @@ void signup(int num){
     while(fread(&avlb,sizeof(user),1,users)==1){
         if(strcmp(input.username,avlb.username)==0){
             printf("Username has been chosen before, Try again\n");
-            signup(num);
+            printf("1. Sign in\n2. Sign up\n");
+            scanf("%d",&choice);
+            switch(choice){
+                case 1:
+                    signin(num);
+                    break;
+                case 2:
+                    signup(num);
+            }
             return;
         }
     }
@@ -245,10 +286,15 @@ void signup(int num){
     printf("Successfully signed up\n");
 }
 void getuser(user *input){
+    //char c='X';
     printf("Username: ");
     scanf("%s",input->username);
     printf("Password: ");
     scanf("%s",input->password);
+    /*while(c!='\n'){
+        c=getchar();
+
+    }*/
 }
 int usersame(user x,user y){
     if(strcmp(x.username,y.username)==0 && strcmp(x.password,y.password)==0)
@@ -319,7 +365,7 @@ void getpoints(ship *s,int num){
         }
         return;
     }
-    printf("Fisrt point of ship:\n");
+    printf("First point of ship:\n");
     getpoint(&(s->p1));
     printf("Second point of ship:\n");
     getpoint(&(s->p2));
@@ -449,7 +495,7 @@ void getpointsA(ship *s,int num){
         getpointsA(s,num);
     }
 }
-void show(char map[height][width]){
+void showS(char map[height][width]){
     int i,j,k;
     printf("\\x");
     for(k=0;k<width;k++){
@@ -488,12 +534,14 @@ void boundaryO(char map[height][width]){
 }
 void game(){
     int choice;
-    printf("\nPress any key to start the game");
-    while(head[1]!=NULL && head[2]!=NULL){
+    score[1]=0;
+    score[2]=0;
+    //while(head[1]!=NULL && head[2]!=NULL){
+    while(CE(1)<21 && CE(2)<21){
         system("cls");
         show(map[1]);
         if(!bot){
-            printf("First player's turn\n");
+            printf("%s's turn\n",player[1]);
         }
         printf("1. Shoot\n2. Rocket\n3. Save\n");
         scanf("%d",&choice);
@@ -504,8 +552,11 @@ void game(){
             case 2:
                 //rocket(1);
                 break;
-                //case 3:
+            case 3:
                 //save();
+                break;
+            default:
+                shoot(1);
         }
         boundaryW(map[1]);
         system("cls");
@@ -518,7 +569,7 @@ void game(){
         else{
             system("cls");
             show(map[2]);
-            printf("Second player's turn\n");
+            printf("%s's turn\n",player[2]);
             printf("1. Shoot\n2. Rocket\n3. Save\n");
             scanf("%d",&choice);
             switch(choice) {
@@ -528,8 +579,11 @@ void game(){
                 case 2:
                     //rocket(1);
                     break;
-                //case 3:
+                case 3:
                     //save();
+                    break;
+                default:
+                    shoot(2);
             }
             boundaryW(map[2]);
             system("cls");
@@ -537,6 +591,11 @@ void game(){
             anykey();
         }
     }
+    system("cls");
+    //if(head[1]==NULL) printf("Player 2 win!");
+    //if(head[2]==NULL) printf("Player 1 win!");
+    if(CE(1)==21) printf("%s win!",player[2]);
+    if(CE(2)==21) printf("%s wins!",player[1]);
 }
 void shoot(int num){
     int i,j;
@@ -564,7 +623,9 @@ void shoot(int num){
              */
             boundaryW(map[num]);
             system("cls");
-            show(map[num]);
+            if(num==1 || !bot){
+                show(map[num]);
+            }
             shoot(num);
         }
         else{
@@ -590,15 +651,14 @@ void boundaryW(char map[height][width]){
     int min,max;
     int i,j,ii,jj;
     int complete,done;
+    ship *tmp;
     //convert E to C
     for(i=1;i<3;i++){
-        printf("player #%d\n",i);
         current=head[i];
         while(current!=end[i]){
-            printf("size %d\n",current->len);
             done=0;
             complete=1;
-            previous=NULL;
+            //previous=NULL;
             if(current->p1.y==current->p2.y){
                 min=min(current->p1.x,current->p2.x);
                 max=max(current->p1.x,current->p2.x);
@@ -614,15 +674,19 @@ void boundaryW(char map[height][width]){
                     if(current==head[i]){
                         head[i]=current->next;
                         head[i]->prev=NULL;
-                        free(current);
+                        if(freeOk) free(current);
                         current=head[i];
                     }
                     else{
-                        current->prev=current->next;
-                        current->next=current->prev;
+                        //current->prev->next=current->next;
+                        //current->next->prev=current->prev;
+                        tmp=current->prev;
+                        tmp->next=current->next;
+                        tmp=current->next;
+                        tmp->prev=current->prev;
                         previous=current;
                         current=current->next;
-                        free(previous);
+                        if(freeOk) free(previous);
                     }
                 }
                 else{
@@ -645,15 +709,19 @@ void boundaryW(char map[height][width]){
                     if(current==head[i]){
                         head[i]=current->next;
                         head[i]->prev=NULL;
-                        free(current);
+                        if(freeOk) free(current);
                         current=head[i];
                     }
                     else{
-                        current->prev=current->next;
-                        current->next=current->prev;
+                        //current->prev->next=current->next;
+                        //current->next->prev=current->prev;
+                        tmp=current->prev;
+                        tmp->next=current->next;
+                        tmp=current->next;
+                        tmp->prev=current->prev;
                         previous=current;
                         current=current->next;
-                        free(previous);
+                        if(freeOk) free(previous);
                     }
                 }
                 else{
@@ -677,12 +745,12 @@ void boundaryW(char map[height][width]){
                 }
                 if(current==head[i]){
                     head[i]=end[i]=NULL;
-                    free(current);
+                    if(freeOk) free(current);
                 }
                 else{
                     end[i]=current->prev;
                     end[i]->next=NULL;
-                    free(current);
+                    if(freeOk) free(current);
                 }
             }
             done=1;
@@ -701,12 +769,12 @@ void boundaryW(char map[height][width]){
                 }
                 if(current==head[i]){
                     head[i]=end[i]=NULL;
-                    free(current);
+                    if(freeOk) free(current);
                 }
                 else{
                     end[i]=current->prev;
                     end[i]->next=NULL;
-                    free(current);
+                    if(freeOk) free(current);
                 }
             }
         }
@@ -725,4 +793,189 @@ void boundaryW(char map[height][width]){
             }
         }
     }
+}
+int CE(int num){
+    int i,j,res=0;
+    for(i=0;i<height;i++){
+        for(j=0;j<width;j++){
+            if(map[num][i][j]=='E' || map[num][i][j]=='C') res++;
+        }
+    }
+    return res;
+}
+void show(char map[height][width]){
+    int i,j,k;
+    printf("%s\\x",MAGENTA);
+    for(k=0;k<width;k++){
+        printf("  %d ",k);
+    }
+    printf("\ny\\%s",CYAN);
+    for(k=0;k<4*width+1;k++){
+        printf("-");
+    }
+    for(i=0;i<height;i++){
+        printf("\n%s%d ",MAGENTA,i);
+        for(j=0;j<width;j++){
+            //printf("| %c ",map[i][j]);
+            printf("%s| ",CYAN);
+            switch(map[i][j]){
+                case 'W':
+                    printf("%s%c",BLUE,map[i][j]);
+                    break;
+                case 'E':
+                    printf("%s%c",YELLOW,map[i][j]);
+                    break;
+                case 'C':
+                    printf("%s%c",RED,map[i][j]);
+                    break;
+                case '#':
+                    printf("%s%c",GREEN,map[i][j]);
+                    break;
+                case 'O':
+                    printf("%s%c",BLUE,map[i][j]);
+                    break;
+                default:
+                    printf("%c",map[i][j]);
+            }
+            printf(" ");
+        }
+        printf("%s|\n  ",CYAN);
+        for(k=0;k<4*width+1;k++) {
+            printf("-");
+        }
+    }
+    printf("\n%s",RESET);
+}
+void settings(){
+    int choice;
+    system("cls");
+    printf("1. Choose theme\n2. Choose text color\n3. Back to main menu\n");
+    scanf("%d",&choice);
+    switch(choice){
+        case 1:
+            theme();
+            break;
+        case 2:
+            textcolor();
+            break;
+        case 3:
+            mainmenu();
+            break;
+        default:
+            printf("Invalid input, Try again\n");
+            settings();
+    }
+}
+void theme(){
+    int choice;
+    system("cls");
+    printf("1. Default theme\n2. Reverse theme\n3. Dark theme\n4. Back to main menu\n");
+    scanf("%d",&choice);
+    switch(choice){
+        case 1:
+            defaulttheme();
+            break;
+        case 2:
+            reversetheme();
+            break;
+        case 3:
+            darktheme();
+            break;
+        case 4:
+            mainmenu();
+            break;
+        default:
+            printf("Invalid input, Try again\n");
+            theme();
+    }
+}
+void textcolor(){
+    int choice;
+    system("cls");
+    printf("%s1. Red\n%s2. Yellow\n%s3. Green\n%s4. Cyan\n",RED,YELLOW,GREEN,CYAN);
+    printf("%s5. Blue\n%s6. Magenta\n%s7. White\n%s",BLUE,MAGENTA,WHITE,RESET);
+    scanf("%d",&choice);
+    switch(choice){
+        case 1:
+            strcpy(RESET,"\x1b[31m");
+            break;
+        case 2:
+            strcpy(RESET,"\x1b[33m");
+            break;
+        case 3:
+            strcpy(RESET,"\x1b[32m");
+            break;
+        case 4:
+            strcpy(RESET,"\x1b[36m");
+            break;
+        case 5:
+            strcpy(RESET,"\x1b[34m");
+            break;
+        case 6:
+            strcpy(RESET,"\x1b[35m");
+            break;
+        case 7:
+            strcpy(RESET,"\x1b[0m");
+            break;
+        default:
+            printf("Invalid input, Try again\n");
+            textcolor();
+    }
+    printf("%sText color has been changed, press any key to back\n",RESET);
+    getch();
+    settings();
+}
+void defaulttheme(){
+    strcpy(RED,"\x1b[31m");
+    strcpy(GREEN,"\x1b[32m");
+    strcpy(YELLOW,"\x1b[33m");
+    strcpy(BLUE,"\x1b[34m");
+    strcpy(MAGENTA,"\x1b[35m");
+    strcpy(CYAN,"\x1b[36m");
+    printf("Theme has been changed, press any key to back\n");
+    getch();
+    settings();
+}
+void reversetheme(){
+    strcpy(RED,"\x1b[34m");
+    strcpy(GREEN,"\x1b[35m");
+    strcpy(YELLOW,"\x1b[36m");
+    strcpy(BLUE,"\x1b[31m");
+    strcpy(MAGENTA,"\x1b[32m");
+    strcpy(CYAN,"\x1b[33m");
+    printf("Theme has been changed, press any key to back\n");
+    getch();
+    settings();
+}
+void darktheme(){
+    strcpy(RED,"\x1b[34m");
+    strcpy(GREEN,"\x1b[35m");
+    strcpy(YELLOW,"\x1b[34m");
+    strcpy(BLUE,"\x1b[31m");
+    strcpy(MAGENTA,"\x1b[32m");
+    strcpy(CYAN,"\x1b[31m");
+    printf("Theme has been changed, press any key to back\n");
+    getch();
+    settings();
+}
+void scoreboard(){
+    user avlb;
+    system("cls");
+    fseek(users,0,SEEK_SET);
+    while(fread(&avlb,sizeof(user),1,users)==1){
+        printf("%s %s%d%s\n",avlb.username,YELLOW,avlb.score,RESET);
+    }
+    printf("\nPress any key to back\n");
+    getch();
+    mainmenu();
+}
+void reset(){
+    fclose(info);
+    fclose(users);
+    info=fopen("info.bin","w");
+    users=fopen("users.bin","w");
+    fclose(info);
+    fclose(users);
+    info=fopen("info.bin","r+");
+    users=fopen("users.bin","r+");
 }
