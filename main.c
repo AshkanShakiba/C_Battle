@@ -18,6 +18,7 @@ int count[9];
 int freeOk=0;
 int score[3];
 int sship;
+int rock[3];
 
 char player[3][33];
 char map[3][height][width];
@@ -87,22 +88,12 @@ void loadlast();
 int shipcount(int num);
 void rocket(int num);
 void about();
+void sort(user *arr,int size);
 
 int main(){
-    /*
-    sship=4;
-    count[1]=0;
-    count[2]=0;
-    count[3]=0;
-    count[4]=1;
-    count[5]=0;
-    count[6]=0;
-    count[7]=0;
-    count[8]=0;
-    score[1]=0;
-    score[2]=0;
-    */
-    sship=21;
+    rock[1]=1;
+    rock[2]=1;
+    sship=6;
     count[1]=4;
     count[2]=3;
     count[3]=2;
@@ -115,7 +106,6 @@ int main(){
     score[2]=0;
     time_t t = time(NULL);
     srand(t);
-    users=fopen("users.bin","r+");
     int i,j,k;
     for(i=1;i<3;i++){
         for(j=0;j<height;j++){
@@ -130,6 +120,9 @@ int main(){
 
 void mainmenu(){
     int choice;
+    end[1]=end[2]=NULL;
+    head[1]=head[2]=NULL;
+    previous=current=NULL;
     system("cls");
     printf("1. Play with a Friend\n2. Play with bot\n3. Load game\n4. Load last game\n");
     printf("5. Settings\n6. Score Board\n7. Reset Data\n8. About\n9. Exit\n");
@@ -279,6 +272,7 @@ void signin(int num){
         }
         return;
     }
+    users=fopen("users.bin","r+");
     fseek(users,0,SEEK_SET);
     while(fread(&avlb,sizeof(user),1,users)==1){
         if(usersame(input,avlb)){
@@ -287,6 +281,7 @@ void signin(int num){
             return;
         }
     }
+    fclose(users);
     printf("Username or password is not correct\n");
     printf("1. Sign in\n2. Sign up\n");
     scanf("%d",&choice);
@@ -302,6 +297,7 @@ void signup(int num){
     user input,avlb;
     int choice;
     getuser(&input);
+    users=fopen("users.bin","r+");
     fseek(users,0,SEEK_SET);
     while(fread(&avlb,sizeof(user),1,users)==1){
         if(strcmp(input.username,avlb.username)==0){
@@ -318,6 +314,7 @@ void signup(int num){
             return;
         }
     }
+    fclose(users);
     adduser(&input);
     strcpy(player[num],input.username);
     printf("Successfully signed up\n");
@@ -339,15 +336,17 @@ int usersame(user x,user y){
     return 0;
 }
 void adduser(user *new){
-    new->score=0;
+    new->score=9999;
+    users=fopen("users.bin","r+");
     fseek(users,0,SEEK_END);
     fwrite(new,sizeof(user),1,users);
     fclose(users);
-    users=fopen("users.bin","r+");
 }
 void putshipM(int num){
     int i,j;
-    previous=NULL;
+    end[1]=end[2]=NULL;
+    head[1]=head[2]=NULL;
+    previous=current=NULL;
     for(i=8;i>=1;i--){
         for(j=1;j<=count[i];j++){
             system("cls");
@@ -447,7 +446,9 @@ void getpoints(ship *s,int num){
 }
 void putshipA(int num){
     int i,j;
-    previous=NULL;
+    end[1]=end[2]=NULL;
+    head[1]=head[2]=NULL;
+    previous=current=NULL;
     for(i=8;i>0;i--){
         for(j=1;j<=count[i];j++){
             if(showsteps){
@@ -596,7 +597,7 @@ void game(){
                         shoot(2);
                         break;
                     case 2:
-                        rocket(1);
+                        rocket(2);
                         break;
                     case 3:
                         save(2);
@@ -613,13 +614,16 @@ void game(){
         turn=1;
     }
     system("cls");
+    users=fopen("users.bin","r+");
     if(CE(1)==sship){
         printf("%s wins!\n",player[1]);
         user avlb;
         fseek(users,0,SEEK_SET);
         while(fread(&avlb,sizeof(user),1,users)==1){
             if(strcmp(avlb.username,player[1])==0){
-                avlb.score+=score[1];
+                avlb.score=avlb.score+score[1];
+                fseek(users,(-1)*(sizeof(user)),SEEK_CUR);
+                fwrite(&avlb,sizeof(user),1,users);
                 break;
             }
         }
@@ -627,7 +631,9 @@ void game(){
         fseek(users,0,SEEK_SET);
         while(fread(&avlb,sizeof(user),1,users)==1){
             if(strcmp(avlb.username,player[2])==0){
-                avlb.score+=score[2]/2;
+                avlb.score=avlb.score+score[2]/2;
+                fseek(users,(-1)*(sizeof(user)),SEEK_CUR);
+                fwrite(&avlb,sizeof(user),1,users);
                 break;
             }
         }
@@ -638,7 +644,9 @@ void game(){
         fseek(users,0,SEEK_SET);
         while(fread(&avlb,sizeof(user),1,users)==1){
             if(strcmp(avlb.username,player[2])==0){
-                avlb.score+=score[2];
+                avlb.score=avlb.score+score[2];
+                fseek(users,(-1)*(sizeof(user)),SEEK_CUR);
+                fwrite(&avlb,sizeof(user),1,users);
                 break;
             }
         }
@@ -646,11 +654,14 @@ void game(){
         fseek(users,0,SEEK_SET);
         while(fread(&avlb,sizeof(user),1,users)==1){
             if(strcmp(avlb.username,player[1])==0){
-                avlb.score+=score[1]/2;
+                avlb.score=avlb.score+score[1]/2;
+                fseek(users,(-1)*(sizeof(user)),SEEK_CUR);
+                fwrite(&avlb,sizeof(user),1,users);
                 break;
             }
         }
     }
+    fclose(users);
     printf("Press any key to back to main menu\n");
     getch();
     mainmenu();
@@ -734,19 +745,20 @@ void boundaryW(char map[height][width],int num){
                         head[i]->prev=NULL;
                         switch(current->len){
                             case 5:
-                                score[i]+=5;
+                                score[change(i)]+=5;
                                 break;
                             case 3:
-                                score[i]+=8;
+                                score[change(i)]+=8;
                                 break;
                             case 2:
-                                score[i]+=12;
+                                score[change(i)]+=12;
                                 break;
                             case 1:
-                                score[i]+=25;
+                                score[change(i)]+=25;
+                                break;
                         }
                         if(freeOk);
-                            free(current);
+                        free(current);
                         current=head[i];
                     }
                     else{
@@ -758,19 +770,20 @@ void boundaryW(char map[height][width],int num){
                         current=current->next;
                         switch(previous->len){
                             case 5:
-                                score[i]+=5;
+                                score[change(i)]+=5;
                                 break;
                             case 3:
-                                score[i]+=8;
+                                score[change(i)]+=8;
                                 break;
                             case 2:
-                                score[i]+=12;
+                                score[change(i)]+=12;
                                 break;
                             case 1:
-                                score[i]+=25;
+                                score[change(i)]+=25;
+                                break;
                         }
                         if(freeOk);
-                            free(previous);
+                        free(previous);
                     }
                 }
                 else{
@@ -795,19 +808,20 @@ void boundaryW(char map[height][width],int num){
                         head[i]->prev=NULL;
                         switch(current->len){
                             case 5:
-                                score[i]+=5;
+                                score[change(i)]+=5;
                                 break;
                             case 3:
-                                score[i]+=8;
+                                score[change(i)]+=8;
                                 break;
                             case 2:
-                                score[i]+=12;
+                                score[change(i)]+=12;
                                 break;
                             case 1:
-                                score[i]+=25;
+                                score[change(i)]+=25;
+                                break;
                         }
                         if(freeOk);
-                            free(current);
+                        free(current);
                         current=head[i];
                     }
                     else{
@@ -819,19 +833,20 @@ void boundaryW(char map[height][width],int num){
                         current=current->next;
                         switch(previous->len){
                             case 5:
-                                score[i]+=5;
+                                score[change(i)]+=5;
                                 break;
                             case 3:
-                                score[i]+=8;
+                                score[change(i)]+=8;
                                 break;
                             case 2:
-                                score[i]+=12;
+                                score[change(i)]+=12;
                                 break;
                             case 1:
-                                score[i]+=25;
+                                score[change(i)]+=25;
+                                break;
                         }
                         if(freeOk);
-                            free(previous);
+                        free(previous);
                     }
                 }
                 else{
@@ -857,38 +872,40 @@ void boundaryW(char map[height][width],int num){
                     head[i]=end[i]=NULL;
                     switch(current->len){
                         case 5:
-                            score[i]+=5;
+                            score[change(i)]+=5;
                             break;
                         case 3:
-                            score[i]+=8;
+                            score[change(i)]+=8;
                             break;
                         case 2:
-                            score[i]+=12;
+                            score[change(i)]+=12;
                             break;
                         case 1:
-                            score[i]+=25;
+                            score[change(i)]+=25;
+                            break;
                     }
                     if(freeOk);
-                        free(current);
+                    free(current);
                 }
                 else{
                     end[i]=current->prev;
                     end[i]->next=NULL;
                     switch(current->len){
                         case 5:
-                            score[i]+=5;
+                            score[change(i)]+=5;
                             break;
                         case 3:
-                            score[i]+=8;
+                            score[change(i)]+=8;
                             break;
                         case 2:
-                            score[i]+=12;
+                            score[change(i)]+=12;
                             break;
                         case 1:
-                            score[i]+=25;
+                            score[change(i)]+=25;
+                            break;
                     }
                     if(freeOk);
-                        free(current);
+                    free(current);
                 }
             }
             done=1;
@@ -909,38 +926,40 @@ void boundaryW(char map[height][width],int num){
                     head[i]=end[i]=NULL;
                     switch(current->len){
                         case 5:
-                            score[i]+=5;
+                            score[change(i)]+=5;
                             break;
                         case 3:
-                            score[i]+=8;
+                            score[change(i)]+=8;
                             break;
                         case 2:
-                            score[i]+=12;
+                            score[change(i)]+=12;
                             break;
                         case 1:
-                            score[i]+=25;
+                            score[change(i)]+=25;
+                            break;
                     }
                     if(freeOk);
-                        free(current);
+                    free(current);
                 }
                 else{
                     end[i]=current->prev;
                     end[i]->next=NULL;
                     switch(current->len){
                         case 5:
-                            score[i]+=5;
+                            score[change(i)]+=5;
                             break;
                         case 3:
-                            score[i]+=8;
+                            score[change(i)]+=8;
                             break;
                         case 2:
-                            score[i]+=12;
+                            score[change(i)]+=12;
                             break;
                         case 1:
-                            score[i]+=25;
+                            score[change(i)]+=25;
+                            break;
                     }
                     if(freeOk);
-                        free(current);
+                    free(current);
                 }
             }
         }
@@ -948,27 +967,11 @@ void boundaryW(char map[height][width],int num){
     //convert <space> to W
     for(i=0;i<height;i++){
         for(j=0;j<width;j++){
-            /*if(map[i][j]=='E'){
-                for(ii=i-1;ii<=i+1;ii++){
-                    for(jj=j-1;jj<=j+1;jj++){
-                        if(0<=ii && ii<height && 0<=jj && jj<width && map[ii][jj]=='E' && ii!=i && jj!=j){
-                            map[ii][jj]='C';
-                            map[i][j]='C';
-                        }
-                        if(0<=ii && ii<height && 0<=jj && jj<width && ii!=i && jj!=j){
-                            if(shipmap[change(num)][ii][jj]=='#' && map[ii][jj]!=' '){
-                                map[ii][jj]='C';
-                                map[i][j]='C';
-                            }
-                        }
-                    }
-                }
-            }*/
             if(map[i][j]=='C'){
                 for(ii=i-1;ii<=i+1;ii++){
                     for(jj=j-1;jj<=j+1;jj++){
                         if(0<=ii && ii<height && 0<=jj && jj<width && map[ii][jj]==' '){
-                                map[ii][jj]='W';
+                            map[ii][jj]='W';
                         }
                         if(0<=ii && ii<height && 0<=jj && jj<width && map[ii][jj]=='E'){
                             map[ii][jj]='C';
@@ -1147,12 +1150,25 @@ void simpletheme(){
     settings();
 }
 void scoreboard(){
-    user avlb;
+    int i=1,j;
+    user avlb,*arr;
     system("cls");
+    users=fopen("users.bin","r");
     fseek(users,0,SEEK_SET);
+    arr=(user*)(malloc(sizeof(user)));
+    fread(&avlb,sizeof(user),1,users);
+    arr[i-1]=avlb;
     while(fread(&avlb,sizeof(user),1,users)==1){
-        printf("%s %s%d%s\n",avlb.username,YELLOW,avlb.score,RESET);
+        i++;
+        arr=(user*)(realloc(arr,sizeof(user)*i));
+        fread(&avlb,sizeof(user),1,users);
+        arr[i-1]=avlb;
     }
+    sort(arr,i);
+    for(j=0;j<i;j++){
+        printf("%s %s%d%s\n",arr[j].username,YELLOW,arr[j].score,RESET);
+    }
+    fclose(users);
     printf("\nPress any key to back\n");
     getch();
     mainmenu();
@@ -1165,12 +1181,10 @@ void reset(){
     scanf("%d",&choice);
     switch(choice){
         case 1:
-            fclose(users);
             info=fopen("info.bin","w");
             users=fopen("users.bin","w");
             fclose(info);
             fclose(users);
-            users=fopen("users.bin","r+");
             load[1]=fopen("load1.bin","w");
             load[2]=fopen("load2.bin","w");
             load[3]=fopen("load3.bin","w");
@@ -1193,7 +1207,7 @@ void reset(){
     }
 }
 void save(int turnnum){
-    int i,j,theme;
+    int i,j,k,theme;
     system("cls");
     printf("Choose your saving file\n");
     printf("1. Load 1\n2. Load 2\n3. Load 3\n4. Load 4\n5. Load 5\n6. Load 6\n");
@@ -1232,12 +1246,21 @@ void save(int turnnum){
     fseek(load[i],0,SEEK_SET);
     fwrite(&bot,sizeof(int),1,load[i]);
     fwrite(&turnnum,sizeof(int),1,load[i]);
-    for(j=1;j<3;j++){
+    for(j=1;j<3;j++){ // j: player num, i: load num
         int shipCount=shipcount(j);
         fwrite(&shipCount,sizeof(int),1,load[i]);
         fwrite(shipmap[j],sizeof(shipmap[j]),1,load[i]);
         fwrite(map[j],sizeof(map[j]),1,load[i]);
         fwrite(player[j],sizeof(player[j]),1,load[i]);
+        /*
+        current=head[j];
+        printf("save %s ships for player %d\n",shipCount,j);
+        getch();
+        for(k=0;k<shipCount;k++){
+            fwrite(current,sizeof(ship),1,load[i]);
+            current=current->next;
+        }
+         */
     }
     if(strcmp(RED,"\x1b[31m")==0)
         theme=1;
@@ -1253,9 +1276,9 @@ void save(int turnnum){
     printf("Saved successfully, press any key to back\n");
     getch();
     mainmenu();
-}
+} //rocket
 void Load(){
-    int i,j;
+    int i,j,k,theme;
     system("cls");
     printf("Choose your loading file\n");
     printf("1. Load 1\n2. Load 2\n3. Load 3\n4. Load 4\n5. Load 5\n6. Load 6\n");
@@ -1307,8 +1330,24 @@ void Load(){
         fread(shipmap[j],sizeof(shipmap[j]),1,load[i]);
         fread(map[j],sizeof(map[j]),1,load[i]);
         fread(player[j],sizeof(player[j]),1,load[i]);
+        /*
+        head[j]=end[j]=previous=NULL;
+        printf("load %s ships for player %d\n",shipCount,j);
+        getch();
+        for(k=0;k<shipCount;k++){
+            fread(current,sizeof(ship),1,load[i]);
+            if(head[j]==NULL){
+                head[j]=current;
+            }
+            else{
+                previous->next=current;
+                current->prev=previous;
+            }
+            previous=current;
+        }
+        end[j]=previous;
+        */
     }
-    int theme;
     fread(&theme,sizeof(int),1,load[i]);
     switch(theme){
         case 1:
@@ -1339,7 +1378,7 @@ void Load(){
     printf("Loaded successfully, press any key to start the game\n");
     getch();
     game();
-}
+} //rocket
 void loadlast(){
     int i,j;
     system("cls");
@@ -1431,7 +1470,7 @@ void loadlast(){
     printf("Loaded successfully, press any key to start the game\n");
     getch();
     game();
-}
+} //rocket
 int shipcount(int num){
     ship *curr;
     int count=1;
@@ -1443,8 +1482,88 @@ int shipcount(int num){
     return count;
 }
 void rocket(int num){
+    if(rock[num]==0){
+        printf("You've used your rocket this match\n");
+        printf("Press any key to shoot\n");
+        getch();
+        shoot(num);
+        return;
+    }
+    user avlb;
+    users=fopen("users.bin","r+");
+    fseek(users,0,SEEK_SET);
+    while(fread(&avlb,sizeof(user),1,users)==1){
+        if(strcmp(avlb.username,player[num])==0){
+            if(avlb.score<100){
+                printf("You don't have enough score to use this weapon\n");
+                printf("Press any key to shoot\n");
+                getch();
+                shoot(num);
+                return;
+            }
+            avlb.score=avlb.score-100;
+            fseek(users,(-1)*(sizeof(user)),SEEK_CUR);
+            fwrite(&avlb,sizeof(user),1,users);
+            break;
+        }
+    }
+    fclose(users);
+    rock[num]=0;
 
-}
+    int choice,z,i;
+    printf("1. Vertical rocket\n2. Horizontal rocket\n");
+    scanf("%d",&choice);
+    switch(choice){
+        case 1:
+            printf("Enter your column\n");
+            scanf("%d",&z); // z is our x
+            for(i=0;i<height;i++){ //i is our y
+                if(map[num][i][z]==' '){
+                    if(shipmap[change(num)][i][z]=='#'){
+                        map[num][i][z]='E';
+                        //boundaryW(map[num],num);
+                        //system("cls");
+                        //show(map[num]);
+                        //Sleep(500);
+                        score[num]++;
+                        break;
+                    }
+                    else{
+                        map[num][i][z]='W';
+                        boundaryW(map[num],num);
+                        system("cls");
+                        show(map[num]);
+                        Sleep(500);
+                    }
+                }
+            }
+            break;
+        case 2:
+            printf("Enter your row\n");
+            scanf("%d",&z); // z is our y
+            for(i=0;i<width;i++){ //i is our x
+                if(map[num][z][i]==' '){
+                    if(shipmap[change(num)][z][i]=='#'){
+                        map[num][z][i]='E';
+                        //boundaryW(map[num],num);
+                        //system("cls");
+                        //show(map[num]);
+                        //Sleep(500);
+                        score[num]++;
+                        break;
+                    }
+                    else{
+                        map[num][z][i]='W';
+                        boundaryW(map[num],num);
+                        system("cls");
+                        show(map[num]);
+                        Sleep(500);
+                    }
+                }
+            }
+    }
+
+} //incomplete
 void about(){
     system("cls");
     printf("Designed By Ashkan Shakiba\n");
@@ -1452,6 +1571,19 @@ void about(){
     printf("2021 Winter\n");
     getch();
     mainmenu();
+}
+void sort(user *arr,int size){
+    int i,j;
+    user tmp;
+    for(i=size-1;i>0;i--){
+        for(j=0;j<i;j++){
+            if(arr[j].score<arr[j+1].score){
+                tmp=arr[j];
+                arr[j]=arr[j+1];
+                arr[j+1]=tmp;
+            }
+        }
+    }
 }
 
 //By Ashkan Shakiba
