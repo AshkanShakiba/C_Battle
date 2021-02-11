@@ -15,9 +15,8 @@ int showsteps=0;
 #define height 10
 #define width 10
 int count[9];
-int freeOk=0;
 int score[3];
-int sship;
+int sship=21;
 int rock[3];
 int firstscore=0;
 
@@ -92,11 +91,11 @@ void about();
 void sort(user *arr,int size);
 void firstscoreset();
 void freemap(char map[height][width]);
+void showstepsset();
 
 int main(){
     rock[1]=1;
     rock[2]=1;
-    sship=21;
     count[1]=4;
     count[2]=3;
     count[3]=2;
@@ -462,9 +461,11 @@ void putshipA(int num){
     previous=current=NULL;
     for(i=8;i>0;i--){
         for(j=1;j<=count[i];j++){
-            if(showsteps){
-                system("cls");
-                show(shipmap[num]);
+            if(num==1 || !bot){
+                if(showsteps){
+                    system("cls");
+                    show(shipmap[num]);
+                }
             }
             current=(ship *)(malloc(sizeof(ship)));
             current->len=i;
@@ -478,8 +479,10 @@ void putshipA(int num){
             previous=current;
             getpointsA(current,num); ///////////////////Segmentation
             boundaryO(shipmap[num]);
-            if(showsteps){
-                anykey();
+            if(num==1 || !bot){
+                if(showsteps){
+                    anykey();
+                }
             }
         }
     }
@@ -572,7 +575,7 @@ void game(){
             if(!bot){
                 printf("%s's turn\n",player[1]);
             }
-            printf("1. Shoot\n2. Rocket\n3. Save\n");
+            printf("1. Shoot\n2. Rocket\n3. Save\n4. Back\n");
             scanf("%d",&choice);
             switch(choice) {
                 case 1:
@@ -583,6 +586,9 @@ void game(){
                     break;
                 case 3:
                     save(1);
+                    break;
+                case 4:
+                    mainmenu();
                     break;
                 default:
                     shoot(1);
@@ -601,7 +607,7 @@ void game(){
                 system("cls");
                 show(map[2]);
                 printf("%s's turn\n",player[2]);
-                printf("1. Shoot\n2. Rocket\n3. Save\n");
+                printf("1. Shoot\n2. Rocket\n3. Save\n4. Back");
                 scanf("%d",&choice);
                 switch(choice) {
                     case 1:
@@ -612,6 +618,9 @@ void game(){
                         break;
                     case 3:
                         save(2);
+                        break;
+                    case 4:
+                        mainmenu();
                         break;
                     default:
                         shoot(2);
@@ -768,7 +777,6 @@ void boundaryW(char map[height][width],int num){
                                 score[change(i)]+=25;
                                 break;
                         }
-                        if(freeOk);
                         free(current);
                         current=head[i];
                     }
@@ -793,7 +801,6 @@ void boundaryW(char map[height][width],int num){
                                 score[change(i)]+=25;
                                 break;
                         }
-                        if(freeOk);
                         free(previous);
                     }
                 }
@@ -831,7 +838,6 @@ void boundaryW(char map[height][width],int num){
                                 score[change(i)]+=25;
                                 break;
                         }
-                        if(freeOk);
                         free(current);
                         current=head[i];
                     }
@@ -856,7 +862,6 @@ void boundaryW(char map[height][width],int num){
                                 score[change(i)]+=25;
                                 break;
                         }
-                        if(freeOk);
                         free(previous);
                     }
                 }
@@ -895,7 +900,6 @@ void boundaryW(char map[height][width],int num){
                             score[change(i)]+=25;
                             break;
                     }
-                    if(freeOk);
                     free(current);
                 }
                 else{
@@ -915,7 +919,6 @@ void boundaryW(char map[height][width],int num){
                             score[change(i)]+=25;
                             break;
                     }
-                    if(freeOk);
                     free(current);
                 }
             }
@@ -949,7 +952,6 @@ void boundaryW(char map[height][width],int num){
                             score[change(i)]+=25;
                             break;
                     }
-                    if(freeOk);
                     free(current);
                 }
                 else{
@@ -969,7 +971,6 @@ void boundaryW(char map[height][width],int num){
                             score[change(i)]+=25;
                             break;
                     }
-                    if(freeOk);
                     free(current);
                 }
             }
@@ -1048,7 +1049,8 @@ void show(char map[height][width]){
 void settings(){
     int choice;
     system("cls");
-    printf("1. Choose theme\n2. Choose text color\n3. Set first score\n4. Back to main menu\n");
+    printf("1. Choose theme\n2. Choose text color\n3. Set first score\n");
+    printf("4. Show steps\n5. Back to main menu\n");
     scanf("%d",&choice);
     switch(choice){
         case 1:
@@ -1061,6 +1063,9 @@ void settings(){
             firstscoreset();
             break;
         case 4:
+            showstepsset();
+            break;
+        case 5:
             mainmenu();
             break;
         default:
@@ -1618,4 +1623,22 @@ void freemap(char map[height][width]){
         }
     }
 }
+void showstepsset(){
+    int choice;
+    system("cls");
+    printf("Do you want to see steps while ships are being put automatically?\n");
+    printf("1. Yes I want to see\n2. No I don't want\n");
+    scanf("%d",&choice);
+    switch(choice){
+        case 1:
+            showsteps=1;
+            break;
+        case 2:
+            showsteps=0;
+    }
+    printf("Changed successfully, press any key to back");
+    getch();
+    settings();
+}
+
 //By Ashkan Shakiba
