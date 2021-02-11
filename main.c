@@ -19,6 +19,7 @@ int freeOk=0;
 int score[3];
 int sship;
 int rock[3];
+int firstscore=0;
 
 char player[3][33];
 char map[3][height][width];
@@ -89,11 +90,13 @@ int shipcount(int num);
 void rocket(int num);
 void about();
 void sort(user *arr,int size);
+void firstscoreset();
+void freemap(char map[height][width]);
 
 int main(){
     rock[1]=1;
     rock[2]=1;
-    sship=6;
+    sship=21;
     count[1]=4;
     count[2]=3;
     count[3]=2;
@@ -336,13 +339,17 @@ int usersame(user x,user y){
     return 0;
 }
 void adduser(user *new){
-    new->score=9999;
+    new->score=firstscore;
     users=fopen("users.bin","r+");
     fseek(users,0,SEEK_END);
     fwrite(new,sizeof(user),1,users);
     fclose(users);
 }
 void putshipM(int num){
+    freemap(map[1]);
+    freemap(map[2]);
+    freemap(shipmap[1]);
+    freemap(shipmap[2]);
     int i,j;
     end[1]=end[2]=NULL;
     head[1]=head[2]=NULL;
@@ -393,7 +400,7 @@ void getpoints(ship *s,int num){
         s->p2=s->p1;
         if(shipmap[num][s->p1.y][s->p1.x]!=' '){
             printf("Invalid input, Try again\n");
-            getch();
+            //getch();
             getpoints(s,num);
         }
         else{
@@ -440,11 +447,15 @@ void getpoints(ship *s,int num){
     }
     if(invalid){
         printf("Invalid input, Try again\n");
-        getch();
+        //getch();
         getpoints(s,num);
     }
 }
 void putshipA(int num){
+    freemap(map[1]);
+    freemap(map[2]);
+    freemap(shipmap[1]);
+    freemap(shipmap[2]);
     int i,j;
     end[1]=end[2]=NULL;
     head[1]=head[2]=NULL;
@@ -465,7 +476,7 @@ void putshipA(int num){
                 current->prev=previous;
             }
             previous=current;
-            getpointsA(current,num);
+            getpointsA(current,num); ///////////////////Segmentation
             boundaryO(shipmap[num]);
             if(showsteps){
                 anykey();
@@ -1037,7 +1048,7 @@ void show(char map[height][width]){
 void settings(){
     int choice;
     system("cls");
-    printf("1. Choose theme\n2. Choose text color\n3. Back to main menu\n");
+    printf("1. Choose theme\n2. Choose text color\n3. Set first score\n4. Back to main menu\n");
     scanf("%d",&choice);
     switch(choice){
         case 1:
@@ -1047,6 +1058,9 @@ void settings(){
             textcolor();
             break;
         case 3:
+            firstscoreset();
+            break;
+        case 4:
             mainmenu();
             break;
         default:
@@ -1144,7 +1158,7 @@ void simpletheme(){
     strcpy(YELLOW,"\x1b[0m");
     strcpy(BLUE,"\x1b[0m");
     strcpy(MAGENTA,"\x1b[0m");
-    strcpy(CYAN,"\x1b[0m");
+    strcpy(CYAN,"\x1b[36m");
     printf("Theme has been changed, press any key to back\n");
     getch();
     settings();
@@ -1248,6 +1262,7 @@ void save(int turnnum){
     fwrite(&turnnum,sizeof(int),1,load[i]);
     for(j=1;j<3;j++){ // j: player num, i: load num
         int shipCount=shipcount(j);
+        fwrite(&rock[j],sizeof(int),1,load[i]);
         fwrite(&shipCount,sizeof(int),1,load[i]);
         fwrite(shipmap[j],sizeof(shipmap[j]),1,load[i]);
         fwrite(map[j],sizeof(map[j]),1,load[i]);
@@ -1276,7 +1291,7 @@ void save(int turnnum){
     printf("Saved successfully, press any key to back\n");
     getch();
     mainmenu();
-} //rocket
+}
 void Load(){
     int i,j,k,theme;
     system("cls");
@@ -1326,6 +1341,7 @@ void Load(){
     fread(&turn,sizeof(int),1,load[i]);
     for(j=1;j<3;j++){
         int shipCount;
+        fread(&rock[j],sizeof(int),1,load[i]);
         fread(&shipCount,sizeof(int),1,load[i]);
         fread(shipmap[j],sizeof(shipmap[j]),1,load[i]);
         fread(map[j],sizeof(map[j]),1,load[i]);
@@ -1378,7 +1394,7 @@ void Load(){
     printf("Loaded successfully, press any key to start the game\n");
     getch();
     game();
-} //rocket
+}
 void loadlast(){
     int i,j;
     system("cls");
@@ -1434,6 +1450,7 @@ void loadlast(){
     fread(&turn,sizeof(int),1,load[i]);
     for(j=1;j<3;j++){
         int shipCount;
+        fread(&rock[j],sizeof(int),1,load[i]);
         fread(&shipCount,sizeof(int),1,load[i]);
         fread(shipmap[j],sizeof(shipmap[j]),1,load[i]);
         fread(map[j],sizeof(map[j]),1,load[i]);
@@ -1470,7 +1487,7 @@ void loadlast(){
     printf("Loaded successfully, press any key to start the game\n");
     getch();
     game();
-} //rocket
+}
 int shipcount(int num){
     ship *curr;
     int count=1;
@@ -1563,7 +1580,7 @@ void rocket(int num){
             }
     }
 
-} //incomplete
+}
 void about(){
     system("cls");
     printf("Designed By Ashkan Shakiba\n");
@@ -1585,5 +1602,20 @@ void sort(user *arr,int size){
         }
     }
 }
-
+void firstscoreset(){
+    system("cls");
+    printf("Enter a number to set as the first score of each user\n");
+    scanf("%d",&firstscore);
+    printf("Changed successfully, press any key to back");
+    getch();
+    settings();
+}
+void freemap(char map[height][width]){
+    int i,j;
+    for(i=0;i<height;i++){
+        for(j=0;j<width;j++){
+            map[i][j]=' ';
+        }
+    }
+}
 //By Ashkan Shakiba
