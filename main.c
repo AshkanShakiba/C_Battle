@@ -369,6 +369,7 @@ void putshipM(int num){
         }
     }
     end[num]=previous;
+    rock[num]=1;
 }
 void getpoint(point *p){
     int x,y;
@@ -471,7 +472,7 @@ void putshipA(int num){
                 current->prev=previous;
             }
             previous=current;
-            getpointsA(current,num); ///////////////////Segmentation
+            getpointsA(current,num);
             boundaryO(shipmap[num]);
             if(num==1 || !bot){
                 if(showsteps){
@@ -481,6 +482,7 @@ void putshipA(int num){
         }
     }
     end[num]=previous;
+    rock[num]=1;
 }
 void getpointsA(ship *s,int num){
     int i,min,max;
@@ -552,6 +554,7 @@ void game(){
     int choice;
     score[1]=0;
     score[2]=0;
+
     while(CE(1)<sship && CE(2)<sship){
         if(turn==1){
             system("cls");
