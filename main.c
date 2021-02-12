@@ -92,6 +92,7 @@ void sort(user *arr,int size);
 void firstscoreset();
 void freemap(char map[height][width]);
 void showstepsset();
+void savemap(int num);
 
 int main(){
     rock[1]=1;
@@ -322,15 +323,10 @@ void signup(int num){
     printf("Successfully signed up\n");
 }
 void getuser(user *input){
-    //char c='X';
     printf("Username: ");
     scanf("%s",input->username);
     printf("Password: ");
     scanf("%s",input->password);
-    /*while(c!='\n'){
-        c=getchar();
-
-    }*/
 }
 int usersame(user x,user y){
     if(strcmp(x.username,y.username)==0 && strcmp(x.password,y.password)==0)
@@ -399,7 +395,6 @@ void getpoints(ship *s,int num){
         s->p2=s->p1;
         if(shipmap[num][s->p1.y][s->p1.x]!=' '){
             printf("Invalid input, Try again\n");
-            //getch();
             getpoints(s,num);
         }
         else{
@@ -446,7 +441,6 @@ void getpoints(ship *s,int num){
     }
     if(invalid){
         printf("Invalid input, Try again\n");
-        //getch();
         getpoints(s,num);
     }
 }
@@ -487,16 +481,6 @@ void putshipA(int num){
         }
     }
     end[num]=previous;
-
-    /*
-    current=head[num];
-    while(current!=end[num]){
-        printf("len=%d  (%d,%d)...(%d,%d)\n",current->len,current->p1.x,current->p1.y,current->p2.x,current->p2.y);
-        current=current->next;
-    }
-    printf("len=%d  (%d,%d)...(%d,%d)\n",current->len,current->p1.x,current->p1.y,current->p2.x,current->p2.y);
-    anykey();
-    */
 }
 void getpointsA(ship *s,int num){
     int i,min,max;
@@ -575,7 +559,7 @@ void game(){
             if(!bot){
                 printf("%s's turn\n",player[1]);
             }
-            printf("1. Shoot\n2. Rocket\n3. Save\n4. Back\n");
+            printf("1. Shoot\n2. Rocket\n3. Save\n4. Back\n5. Save Map\n");
             scanf("%d",&choice);
             switch(choice) {
                 case 1:
@@ -589,6 +573,14 @@ void game(){
                     break;
                 case 4:
                     mainmenu();
+                    break;
+                case 5:
+                    savemap(1);
+                    printf("Map saved\n");
+                    printf("You can see it by SeeMap.exe\n");
+                    printf("Press any key to shoot\n");
+                    getch();
+                    shoot(1);
                     break;
                 default:
                     shoot(1);
@@ -607,7 +599,7 @@ void game(){
                 system("cls");
                 show(map[2]);
                 printf("%s's turn\n",player[2]);
-                printf("1. Shoot\n2. Rocket\n3. Save\n4. Back");
+                printf("1. Shoot\n2. Rocket\n3. Save\n4. Back\n5. Save Map\n");
                 scanf("%d",&choice);
                 switch(choice) {
                     case 1:
@@ -621,6 +613,14 @@ void game(){
                         break;
                     case 4:
                         mainmenu();
+                        break;
+                    case 5:
+                        savemap(2);
+                        printf("Map saved\n");
+                        printf("You can see it by SeeMap.exe\n");
+                        printf("Press any key to shoot\n");
+                        getch();
+                        shoot(2);
                         break;
                     default:
                         shoot(2);
@@ -699,17 +699,6 @@ void shoot(int num){
     if(map[num][p.y][p.x]==' '){
         if(shipmap[change(num)][p.y][p.x]=='#'){
             map[num][p.y][p.x]='E';
-            /*
-            for(i=p.x-1;i<=p.x+1;i++){
-                for(j=p.y-1;j<=p.y+1;j++){
-                    if(0<=i && i<height && 0<=j && j<width){
-                        if(shipmap[change(num)][i][j]=='#' && map[num][i][j]==' '){
-                            map[num][p.y][p.x]='E';
-                        }
-                    }
-                }
-            }
-             */
             boundaryW(map[num],num);
             system("cls");
             if(num==1 || !bot){
@@ -742,7 +731,6 @@ void boundaryW(char map[height][width],int num){
     int i,j,ii,jj;
     int complete,done;
     ship *tmp;
-    //convert E to C
     for(i=1;i<3;i++){
         current=head[i];
         while(current!=end[i]){
@@ -976,7 +964,6 @@ void boundaryW(char map[height][width],int num){
             }
         }
     }
-    //convert <space> to W
     for(i=0;i<height;i++){
         for(j=0;j<width;j++){
             if(map[i][j]=='C'){
@@ -1016,7 +1003,6 @@ void show(char map[height][width]){
     for(i=0;i<height;i++){
         printf("\n%s%d ",MAGENTA,i);
         for(j=0;j<width;j++){
-            //printf("| %c ",map[i][j]);
             printf("%s| ",CYAN);
             switch(map[i][j]){
                 case 'W':
@@ -1272,15 +1258,6 @@ void save(int turnnum){
         fwrite(shipmap[j],sizeof(shipmap[j]),1,load[i]);
         fwrite(map[j],sizeof(map[j]),1,load[i]);
         fwrite(player[j],sizeof(player[j]),1,load[i]);
-        /*
-        current=head[j];
-        printf("save %s ships for player %d\n",shipCount,j);
-        getch();
-        for(k=0;k<shipCount;k++){
-            fwrite(current,sizeof(ship),1,load[i]);
-            current=current->next;
-        }
-         */
     }
     if(strcmp(RED,"\x1b[31m")==0)
         theme=1;
@@ -1351,23 +1328,6 @@ void Load(){
         fread(shipmap[j],sizeof(shipmap[j]),1,load[i]);
         fread(map[j],sizeof(map[j]),1,load[i]);
         fread(player[j],sizeof(player[j]),1,load[i]);
-        /*
-        head[j]=end[j]=previous=NULL;
-        printf("load %s ships for player %d\n",shipCount,j);
-        getch();
-        for(k=0;k<shipCount;k++){
-            fread(current,sizeof(ship),1,load[i]);
-            if(head[j]==NULL){
-                head[j]=current;
-            }
-            else{
-                previous->next=current;
-                current->prev=previous;
-            }
-            previous=current;
-        }
-        end[j]=previous;
-        */
     }
     fread(&theme,sizeof(int),1,load[i]);
     switch(theme){
@@ -1543,10 +1503,6 @@ void rocket(int num){
                 if(map[num][i][z]==' '){
                     if(shipmap[change(num)][i][z]=='#'){
                         map[num][i][z]='E';
-                        //boundaryW(map[num],num);
-                        //system("cls");
-                        //show(map[num]);
-                        //Sleep(500);
                         score[num]++;
                         break;
                     }
@@ -1567,10 +1523,6 @@ void rocket(int num){
                 if(map[num][z][i]==' '){
                     if(shipmap[change(num)][z][i]=='#'){
                         map[num][z][i]='E';
-                        //boundaryW(map[num],num);
-                        //system("cls");
-                        //show(map[num]);
-                        //Sleep(500);
                         score[num]++;
                         break;
                     }
@@ -1639,6 +1591,12 @@ void showstepsset(){
     printf("Changed successfully, press any key to back");
     getch();
     settings();
+}
+void savemap(int num){
+    FILE *mf;
+    mf=fopen("map.bin","w");
+    fwrite(map[num],sizeof(map[num]),1,mf);
+    fclose(mf);
 }
 
 //By Ashkan Shakiba
