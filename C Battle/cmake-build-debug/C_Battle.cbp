@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="C_Battle"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="E:/College/Mabani/Project/C Battle/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="C:/PROGRA~2/Dev-Cpp/MinGW64/bin/mingw32-make.exe -f &quot;E:/College/Mabani/Project/C Battle/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="C:/PROGRA~2/Dev-Cpp/MinGW64/bin/mingw32-make.exe -f &quot;E:/College/Mabani/Project/C Battle/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="C:/PROGRA~2/Dev-Cpp/MinGW64/bin/mingw32-make.exe -f &quot;E:/College/Mabani/Project/C Battle/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="C:/PROGRA~2/Dev-Cpp/MinGW64/bin/mingw32-make.exe -f &quot;E:/College/Mabani/Project/C Battle/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="E:/College/Mabani/Project/C Battle/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="C:/PROGRA~2/Dev-Cpp/MinGW64/bin/mingw32-make.exe -f &quot;E:/College/Mabani/Project/C Battle/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="C:/PROGRA~2/Dev-Cpp/MinGW64/bin/mingw32-make.exe -f &quot;E:/College/Mabani/Project/C Battle/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="C:/PROGRA~2/Dev-Cpp/MinGW64/bin/mingw32-make.exe -f &quot;E:/College/Mabani/Project/C Battle/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="C:/PROGRA~2/Dev-Cpp/MinGW64/bin/mingw32-make.exe -f &quot;E:/College/Mabani/Project/C Battle/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="C_Battle">
+				<Option output="E:/College/Mabani/Project/C Battle/cmake-build-debug/C_Battle.exe" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="E:/College/Mabani/Project/C Battle/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="c:\program files (x86)\dev-cpp\mingw64\bin\../lib/gcc/x86_64-w64-mingw32/4.8.1/include"/>
+					<Add directory="c:\program files (x86)\dev-cpp\mingw64\bin\../lib/gcc/x86_64-w64-mingw32/4.8.1/../../../../include"/>
+					<Add directory="c:\program files (x86)\dev-cpp\mingw64\bin\../lib/gcc/x86_64-w64-mingw32/4.8.1/include-fixed"/>
+					<Add directory="c:\program files (x86)\dev-cpp\mingw64\bin\../lib/gcc/x86_64-w64-mingw32/4.8.1/../../../../x86_64-w64-mingw32/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="C:/PROGRA~2/Dev-Cpp/MinGW64/bin/mingw32-make.exe -f &quot;E:/College/Mabani/Project/C Battle/cmake-build-debug/Makefile&quot;  VERBOSE=1 C_Battle"/>
+					<CompileFile command="C:/PROGRA~2/Dev-Cpp/MinGW64/bin/mingw32-make.exe -f &quot;E:/College/Mabani/Project/C Battle/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="C:/PROGRA~2/Dev-Cpp/MinGW64/bin/mingw32-make.exe -f &quot;E:/College/Mabani/Project/C Battle/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="C:/PROGRA~2/Dev-Cpp/MinGW64/bin/mingw32-make.exe -f &quot;E:/College/Mabani/Project/C Battle/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="C_Battle/fast">
+				<Option output="E:/College/Mabani/Project/C Battle/cmake-build-debug/C_Battle.exe" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="E:/College/Mabani/Project/C Battle/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="c:\program files (x86)\dev-cpp\mingw64\bin\../lib/gcc/x86_64-w64-mingw32/4.8.1/include"/>
+					<Add directory="c:\program files (x86)\dev-cpp\mingw64\bin\../lib/gcc/x86_64-w64-mingw32/4.8.1/../../../../include"/>
+					<Add directory="c:\program files (x86)\dev-cpp\mingw64\bin\../lib/gcc/x86_64-w64-mingw32/4.8.1/include-fixed"/>
+					<Add directory="c:\program files (x86)\dev-cpp\mingw64\bin\../lib/gcc/x86_64-w64-mingw32/4.8.1/../../../../x86_64-w64-mingw32/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="C:/PROGRA~2/Dev-Cpp/MinGW64/bin/mingw32-make.exe -f &quot;E:/College/Mabani/Project/C Battle/cmake-build-debug/Makefile&quot;  VERBOSE=1 C_Battle/fast"/>
+					<CompileFile command="C:/PROGRA~2/Dev-Cpp/MinGW64/bin/mingw32-make.exe -f &quot;E:/College/Mabani/Project/C Battle/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="C:/PROGRA~2/Dev-Cpp/MinGW64/bin/mingw32-make.exe -f &quot;E:/College/Mabani/Project/C Battle/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="C:/PROGRA~2/Dev-Cpp/MinGW64/bin/mingw32-make.exe -f &quot;E:/College/Mabani/Project/C Battle/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="E:/College/Mabani/Project/C Battle/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="C:/PROGRA~2/Dev-Cpp/MinGW64/bin/mingw32-make.exe -f &quot;E:/College/Mabani/Project/C Battle/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="C:/PROGRA~2/Dev-Cpp/MinGW64/bin/mingw32-make.exe -f &quot;E:/College/Mabani/Project/C Battle/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="C:/PROGRA~2/Dev-Cpp/MinGW64/bin/mingw32-make.exe -f &quot;E:/College/Mabani/Project/C Battle/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="C:/PROGRA~2/Dev-Cpp/MinGW64/bin/mingw32-make.exe -f &quot;E:/College/Mabani/Project/C Battle/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="E:/College/Mabani/Project/C Battle/info.bin">
+			<Option target="C_Battle"/>
+		</Unit>
+		<Unit filename="E:/College/Mabani/Project/C Battle/main.c">
+			<Option target="C_Battle"/>
+		</Unit>
+		<Unit filename="E:/College/Mabani/Project/C Battle/users.bin">
+			<Option target="C_Battle"/>
+		</Unit>
+		<Unit filename="E:/College/Mabani/Project/C Battle/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>
